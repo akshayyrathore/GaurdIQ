@@ -1,4 +1,4 @@
-# Percepta - AI Brain for WAF
+# GaurdIQ - AI Brain for WAF
 
 **Percepta** is an autonomous AI security brain that sits on top of existing Web Application Firewalls. It uses an Agentic AI approach to **Observe**, **Reason**, and **Decide** on security threats in real-time.
 
@@ -55,3 +55,4 @@ The UI will run at `http://localhost:3000`.
 
 ---
 Built with ❤️ by Antigravity AI.
+
