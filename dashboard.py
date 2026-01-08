@@ -3,7 +3,7 @@ from sqlmodel import Session, select, func
 from backend.storage.db import get_session
 from backend.models.sql import AccessLog, Decision
 
-router = APIRouter()
+
 
 @router.get("/stats")
 async def get_stats(session: Session = Depends(get_session)):
@@ -55,4 +55,5 @@ async def get_live_traffic(limit: int = 20, session: Session = Depends(get_sessi
             "timestamp": log.timestamp
         })
     return traffic
+
 
