@@ -78,3 +78,4 @@ async def get_live_traffic(
         })
 
     return traffic
+
