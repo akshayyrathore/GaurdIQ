@@ -134,3 +134,4 @@ class AnomalyDetector:
 # Singleton / Dependency
 # ---------------------------------------------------------
 detector = AnomalyDetector()
+
