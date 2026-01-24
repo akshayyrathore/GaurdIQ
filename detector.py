@@ -57,3 +57,102 @@ class AnomalyDetector:
 
         self.model.fit(X)
         self.save()
+        # ---------------------------------------------------------
+    # Prediction
+    # ---------------------------------------------------------
+    def predict(self, log: AccessLog) -> float:
+        """
+        Returns anomaly score in range [0, 1]
+        0 → normal
+        1 → highly anomalous
+        """
+        if self.model is None:
+            return 0.0
+
+        try:
+            check_is_fitted(self.model)
+        except Exception:
+            return 0.0
+
+        df = self._logs_to_df([log])
+        X = self._extract_features(df)
+
+        raw_score = self.model.decision_function(X)[0]
+
+        # Normalize → anomaly score
+        anomaly_score = float(np.clip(-raw_score, 0, 1))
+        return anomaly_score
+
+    # ---------------------------------------------------------
+    # Feature Engineering
+    # ---------------------------------------------------------
+    def _logs_to_df(self, logs: list[AccessLog]) -> pd.DataFrame:
+        return pd.DataFrame([log.dict() for log in logs])
+
+    def _extract_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Enhanced feature set for access-log anomaly detection
+        """
+        features = pd.DataFrame()
+
+        # --------------------
+        # Payload behavior
+        # --------------------
+        payload = df.get("payload_size", 0)
+        features["payload_size"] = payload
+        features["payload_log"] = np.log1p(payload)
+
+        # --------------------
+        # Endpoint behavior
+        # --------------------
+        endpoint = df.get("endpoint", "").astype(str)
+        features["endpoint_len"] = endpoint.apply(len)
+        features["endpoint_depth"] = endpoint.apply(lambda x: x.count("/"))
+        features["has_query_params"] = endpoint.apply(lambda x: int("?" in x))
+
+        # --------------------
+        # HTTP method
+        # --------------------
+        method_map = {
+            "GET": 0,
+            "POST": 1,
+            "PUT": 2,
+            "DELETE": 3,
+            "PATCH": 4,
+        }
+        features["method"] = (
+            df.get("method", "")
+            .astype(str)
+            .map(method_map)
+            .fillna(5)
+        )
+
+        # --------------------
+        # Status behavior
+        # --------------------
+        status = df.get("status_code", 0)
+        features["status_code"] = status
+        features["status_class"] = (status // 100).clip(0, 5)
+
+        # --------------------
+        # IP behavior
+        # --------------------
+        ip = df.get("ip_address", "").astype(str)
+        ip_split = ip.str.split(".", expand=True)
+
+        features["ip_octet_1"] = (
+            pd.to_numeric(ip_split[0], errors="coerce").fillna(0)
+            if ip_split.shape[1] > 0 else 0
+        )
+        features["ip_octet_2"] = (
+            pd.to_numeric(ip_split[1], errors="coerce").fillna(0)
+            if ip_split.shape[1] > 1 else 0
+        )
+
+        # --------------------
+        # User-Agent behavior
+        # --------------------
+        user_agent = df.get("user_agent", "").astype(str)
+        features["user_agent_len"] = user_agent.apply(len)
+
+
