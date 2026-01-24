@@ -149,12 +149,7 @@ class AnomalyDetector:
             if ip_split.shape[1] > 1 else 0
         )
 
-        # --------------------
-        # User-Agent behavior
-        # --------------------
-        user_agent = df.get("user_agent", "").astype(str)
-        features["user_agent_len"] = user_agent.apply(len)
-
+       
         # --------------------
         # User-Agent behavior
         # --------------------
@@ -187,5 +182,6 @@ class AnomalyDetector:
 # Singleton / Dependency
 # ---------------------------------------------------------
 detector = AnomalyDetector()
+
 
 
