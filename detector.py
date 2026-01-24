@@ -155,4 +155,37 @@ class AnomalyDetector:
         user_agent = df.get("user_agent", "").astype(str)
         features["user_agent_len"] = user_agent.apply(len)
 
+        # --------------------
+        # User-Agent behavior
+        # --------------------
+        user_agent = df.get("user_agent", "").astype(str)
+        features["user_agent_len"] = user_agent.apply(len)
+
+        # --------------------
+        # Time-based features
+        # --------------------
+        if "timestamp" in df.columns:
+            ts = pd.to_datetime(df["timestamp"], errors="coerce")
+            hour = ts.dt.hour.fillna(0)
+
+            features["hour"] = hour
+            features["minute"] = ts.dt.minute.fillna(0)
+
+            # Cyclic encoding (important!)
+            features["hour_sin"] = np.sin(2 * np.pi * hour / 24)
+            features["hour_cos"] = np.cos(2 * np.pi * hour / 24)
+        else:
+            features["hour"] = 0
+            features["minute"] = 0
+            features["hour_sin"] = 0
+            features["hour_cos"] = 0
+
+        return features.fillna(0)
+
+
+# ---------------------------------------------------------
+# Singleton / Dependency
+# ---------------------------------------------------------
+detector = AnomalyDetector()
+
 
