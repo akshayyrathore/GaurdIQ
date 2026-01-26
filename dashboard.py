@@ -135,6 +135,17 @@ async def get_live_traffic(
             "action": dec.action,
             "timestamp": log.timestamp,
         })
+     class AccessLog(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    ip: str = Field(index=True)
+    method: str
+    endpoint: str
+    status_code: int
+    timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
+
+    __table_args__ = (
+        Index("idx_accesslog_ip_timestamp", "ip", "timestamp"),
+    )
 
     return {
         "count": len(traffic),
@@ -142,3 +153,4 @@ async def get_live_traffic(
         "offset": offset,
         "data": traffic,
     }
+
