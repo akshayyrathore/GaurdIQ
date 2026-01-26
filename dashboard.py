@@ -148,6 +148,15 @@ async def get_live_traffic(
     __table_args__ = (
         Index("idx_accesslog_ip_timestamp", "ip", "timestamp"),
     )
+class Decision(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    access_log_id: int = Field(foreign_key="accesslog.id", index=True)
+    action: str = Field(index=True)
+    timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
+
+    __table_args__ = (
+        Index("idx_decision_action_timestamp", "action", "timestamp"),
+    )
 
     return {
         "count": len(traffic),
@@ -155,5 +164,6 @@ async def get_live_traffic(
         "offset": offset,
         "data": traffic,
     }
+
 
 
