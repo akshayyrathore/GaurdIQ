@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select, func
 from datetime import datetime, timedelta
+from sqlmodel import SQLModel, Field
+from sqlalchemy import Index
 
 from backend.storage.db import get_session
 from backend.models.sql import AccessLog, Decision
@@ -153,4 +155,5 @@ async def get_live_traffic(
         "offset": offset,
         "data": traffic,
     }
+
 
